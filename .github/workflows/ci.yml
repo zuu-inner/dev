@@ -9,14 +9,18 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: windows-latest
             preset: msvc
-          - os: ubuntu-latest
+            binary: build/bin/Release/Dev.exe
+          - os: ubuntu-24.04
             preset: gcc
+            binary: build/bin/Dev
           - os: macos-latest
             preset: clang
+            binary: build/bin/Dev
 
     runs-on: ${{ matrix.os }}
     name: Build (${{ matrix.preset }})
@@ -34,34 +38,19 @@ jobs:
         shell: bash
         run: |
           echo "=== Checking plugins directory ==="
-          ls -la plugins/ || ls -la build/plugins/ || echo "No plugins dir"
+          ls -la plugins/ 2>/dev/null || echo "plugins/ not found here"
 
       - name: Test — version
         shell: bash
-        run: |
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            ./build/bin/Release/Dev.exe --version
-          else
-            ./build/bin/Dev --version || ./build/bin/Release/Dev --version
-          fi
+        run: ${{ matrix.binary }} --version
 
       - name: Test — list
         shell: bash
-        run: |
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            ./build/bin/Release/Dev.exe list
-          else
-            ./build/bin/Dev list || ./build/bin/Release/Dev list
-          fi
+        run: ${{ matrix.binary }} list
 
       - name: Test — hello plugin
         shell: bash
-        run: |
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            ./build/bin/Release/Dev.exe hello CI
-          else
-            ./build/bin/Dev hello CI || ./build/bin/Release/Dev hello CI
-          fi
+        run: ${{ matrix.binary }} hello CI
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -69,5 +58,59 @@ jobs:
           name: dev-${{ matrix.preset }}
           path: |
             build/bin/Release/*
+            build/bin/Dev
             plugins/*
           if-no-files-found: warn
+
+  lint:
+    runs-on: ubuntu-24.04
+    name: Clang-Tidy
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-tidy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-tidy
+
+      - name: Configure
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+      - name: Lint dispatcher
+        run: |
+          clang-tidy \
+            -p build \
+            --header-filter='include/dev/.*' \
+            --warnings-as-errors='*' \
+            --checks='-*,
+              bugprone-*,
+              clang-analyzer-*,
+              cppcoreguidelines-*,
+              misc-*,
+              modernize-*,
+              performance-*,
+              readability-*,
+              -modernize-use-trailing-return-type,
+              -readability-identifier-length,
+              -cppcoreguidelines-avoid-magic-numbers,
+              -readability-magic-numbers' \
+            src/main.cpp
+
+      - name: Lint plugins
+        run: |
+          for f in examples/*.cpp; do
+            echo "=== Linting $f ==="
+            clang-tidy \
+              -p build \
+              --checks='-*,
+                bugprone-*,
+                clang-analyzer-*,
+                performance-*,
+                readability-braces-around-statements,
+                modernize-use-nullptr' \
+              "$f" || true
+          done

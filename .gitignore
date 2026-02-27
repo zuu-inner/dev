@@ -18,6 +18,7 @@ cmake_install.cmake
 *.o
 *.a
 *.lib
+*.log
 
 # Generated
 compile_commands.json
