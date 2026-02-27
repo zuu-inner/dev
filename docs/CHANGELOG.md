@@ -11,6 +11,17 @@ dan proyek ini mengikuti [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ---
 
+## [1.0.0] — 2026-02-27
+
+### Added
+- Plugin template generator: `dev init-plugin <name>`
+- GitHub Actions CI pipeline (Windows MSVC, Ubuntu GCC, macOS Clang)
+- Package distribution: Scoop manifest, Homebrew formula template
+- Complete documentation update (README, API, Architecture)
+
+### Changed
+- Version bump to 1.0.0 — first stable release
+
 ## [0.4.0] — 2026-02-27
 
 ### Added

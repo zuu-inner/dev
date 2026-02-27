@@ -1,6 +1,6 @@
 # Build Guide
 
-> Panduan lengkap untuk meng-compile `dev` dari source code.
+> Panduan lengkap untuk meng-compile `dev` v1.0.0 dari source code.
 
 ---
 
@@ -10,50 +10,34 @@
 |------|---------------|----------|
 | CMake | 3.20 | [cmake.org](https://cmake.org/download/) |
 | C++ Compiler (C++23) | GCC 13+ / Clang 17+ / MSVC 19.35+ | — |
-| Git | Terbaru | [git-scm.com](https://git-scm.com/) |
 
 ---
 
-## Clone
+## Build
 
-```bash
-git clone https://github.com/zuudevs/dev.git
-cd dev
-```
-
----
-
-## Build Configurations
-
-### Release Build
+### Release (recommended)
 
 ```bash
 cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --config Release
 ```
 
-Output binary: `build/bin/Dev` (atau `build/bin/Release/Dev.exe` di Windows MSVC).
-
-### Debug Build
+### Debug
 
 ```bash
 cmake -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build --config Debug
 ```
 
-### Windows — Visual Studio Generator
+### Windows — Visual Studio
 
 ```powershell
-# Generate Visual Studio solution
 cmake -B build -G "Visual Studio 17 2022"
-
-# Build dari command line
 cmake --build build --config Release
-
 # Atau buka build/Dev.sln di Visual Studio
 ```
 
-### Windows — Ninja Generator
+### Windows — Ninja
 
 ```powershell
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
@@ -62,80 +46,95 @@ cmake --build build
 
 ---
 
-## Compiler Flags
+## Output
 
-`dev` menggunakan compiler flags yang ketat untuk memastikan kualitas kode:
+| Output | Lokasi |
+|--------|--------|
+| Dispatcher | `build/bin/Release/Dev.exe` (Windows) / `build/bin/Dev` (Linux) |
+| Plugins | `plugins/` (9 plugins bawaan) |
+| Generated headers | `build/include/dev/version.hpp` |
+
+---
+
+## CMake Options
+
+| Variable | Default | Deskripsi |
+|----------|---------|-----------|
+| `CMAKE_BUILD_TYPE` | — | `Debug`, `Release`, `RelWithDebInfo` |
+| `DEV_BUILD_EXAMPLES` | `ON` | Build example + core plugins ke `plugins/` |
+
+Disable plugin build:
+
+```bash
+cmake -B build -DDEV_BUILD_EXAMPLES=OFF
+```
+
+---
+
+## Compiler Flags
 
 ### MSVC
 
 | Flag | Deskripsi |
 |------|-----------|
-| `/W4` | Warning level 4 (hampir semua warning) |
+| `/W4` | Warning level 4 |
 | `/permissive-` | Strict standards conformance |
 | `/utf-8` | UTF-8 source & execution charset |
-| `/O2` | Optimisasi Release |
 
 ### GCC / Clang
 
 | Flag | Deskripsi |
 |------|-----------|
-| `-Wall` | Semua warning umum |
-| `-Wextra` | Warning tambahan |
-| `-Wpedantic` | Strict ISO C++ compliance |
-| `-Wconversion` | Warning implicit conversion |
-| `-Wshadow` | Warning variable shadowing |
-| `-O3` | Optimisasi Release |
+| `-Wall -Wextra` | Semua warning |
+| `-Wpedantic` | Strict ISO C++ |
+| `-Wconversion` | Implicit conversion warning |
+| `-Wshadow` | Variable shadowing warning |
 
 ---
 
-## Output Directories
-
-| Output | Lokasi |
-|--------|--------|
-| Binary (executable) | `build/bin/` |
-| Static Libraries | `lib/` |
-| Shared Libraries | `lib/` |
-
----
-
-## Build dari Scratch (Clean Build)
+## Clean Build
 
 ```bash
-# Hapus folder build lama
-rm -rf build/    # Linux/macOS
-rmdir /s build   # Windows CMD
+# Hapus build lama
+rm -rf build/              # Linux/macOS
+Remove-Item -Recurse build # PowerShell
 
-# Lalu configure & build ulang
+# Build ulang
 cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --config Release
 ```
 
 ---
 
-## CMake Variables
+## Verify Build
 
-| Variable | Default | Deskripsi |
-|----------|---------|-----------|
-| `CMAKE_BUILD_TYPE` | — | `Debug`, `Release`, `RelWithDebInfo`, `MinSizeRel` |
-| `CMAKE_CXX_STANDARD` | `23` | Standar C++ yang digunakan |
-| `CMAKE_RUNTIME_OUTPUT_DIRECTORY` | `${CMAKE_BINARY_DIR}/bin` | Lokasi output binary |
+```bash
+./build/bin/Release/Dev.exe --version    # → dev v1.0.0
+./build/bin/Release/Dev.exe list         # → 9 plugins
+./build/bin/Release/Dev.exe hello World  # → Hello, World!
+```
 
 ---
 
 ## Troubleshooting
 
-### Error: C++23 tidak didukung
+### C++23 tidak didukung
 
 ```
 error: 'std::print' is not a member of 'std'
 ```
 
-**Solusi:** Upgrade compiler ke versi yang mendukung C++23. Lihat tabel prerequisites di atas.
+**Solusi:** Upgrade ke GCC 13+, Clang 17+, atau MSVC 19.35+.
 
-### Error: CMake versi terlalu lama
+### CMake versi terlalu lama
 
 ```
 CMake Error: CMake 3.20 or higher is required.
 ```
 
 **Solusi:** Download CMake terbaru dari [cmake.org](https://cmake.org/download/).
+
+### Target 'clean' reserved
+
+CMake targets `build` dan `clean` di-prefix dengan `dev_` secara internal.
+Output binary tetap menggunakan nama asli via `OUTPUT_NAME`.

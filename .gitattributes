@@ -1,0 +1,45 @@
+# Auto detect text files and normalise line endings
+* text=auto
+
+# Source code
+*.cpp text diff=cpp
+*.hpp text diff=cpp
+*.h   text diff=cpp
+*.c   text diff=cpp
+
+# CMake
+CMakeLists.txt text
+*.cmake        text
+
+# Documentation
+*.md   text diff=markdown
+*.txt  text
+*.toml text
+
+# Config
+*.yml  text
+*.yaml text
+*.json text
+
+# Scripts
+*.sh   text eol=lf
+*.bash text eol=lf
+*.ps1  text eol=crlf
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+
+# Binary — no diff, no merge
+*.exe  binary
+*.pdb  binary
+*.o    binary
+*.obj  binary
+*.a    binary
+*.lib  binary
+*.png  binary
+*.jpg  binary
+*.ico  binary
+
+# Linguist — repo language stats
+*.md   linguist-documentation
+*.yml  linguist-detectable=false
+docs/* linguist-documentation

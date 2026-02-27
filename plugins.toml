@@ -27,3 +27,6 @@ description = "Remove build artifacts"
 
 [completion]
 description = "Generate shell completion scripts"
+
+[init-plugin]
+description = "Scaffold a new dev plugin project"

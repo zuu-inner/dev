@@ -1,8 +1,29 @@
-/bin/
+# Build
 /build/
+/bin/
 /.cache/
-/.vscode/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
 
-*.json
+# IDE
+/.vscode/
+/.idea/
+*.code-workspace
+
+# Binaries
 *.exe
 *.pdb
+*.obj
+*.o
+*.a
+*.lib
+
+# Generated
+compile_commands.json
+/plugins/*.exe
+/plugins/*.pdb
+
+# OS
+Thumbs.db
+.DS_Store

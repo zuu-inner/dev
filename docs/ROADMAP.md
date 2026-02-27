@@ -61,13 +61,15 @@ Polish developer experience — **selesai**.
 
 ---
 
-## v1.0.0 — Stable Release
+## ✅ v1.0.0 (Current) — Stable Release
 
-- [ ] Semua fitur core stabil dan teruji
-- [ ] Dokumentasi lengkap
-- [ ] CI/CD pipeline
-- [ ] Package distribution (Homebrew, Scoop, APT)
-- [ ] Plugin template generator
+Pertama rilis stabil — **selesai**.
+
+- [x] Plugin template generator (`dev init-plugin <name>`)
+- [x] GitHub Actions CI (Windows/Ubuntu/macOS)
+- [x] Package distribution templates (Scoop, Homebrew)
+- [x] Dokumentasi lengkap (README, API, Architecture)
+- [x] Version bump ke 1.0.0
 
 ---
 

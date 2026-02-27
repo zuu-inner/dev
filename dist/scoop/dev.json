@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0",
+  "description": "Lightweight CLI dispatcher for developers",
+  "homepage": "https://github.com/zuudevs/dev",
+  "license": "MIT",
+  "architecture": {
+    "64bit": {
+      "url": "https://github.com/zuudevs/dev/releases/download/v1.0.0/dev-windows-x64.zip",
+      "hash": ""
+    }
+  },
+  "bin": "dev.exe",
+  "checkver": "github",
+  "autoupdate": {
+    "architecture": {
+      "64bit": {
+        "url": "https://github.com/zuudevs/dev/releases/download/v$version/dev-windows-x64.zip"
+      }
+    }
+  }
+}

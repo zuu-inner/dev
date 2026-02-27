@@ -1,241 +1,192 @@
 # Plugin API Reference
 
-> Dokumentasi lengkap tentang cara membuat, menginstall, dan mengonfigurasi plugin untuk `dev`.
-
----
-
-## Daftar Isi
-
-- [Overview](#overview)
-- [Kontrak Plugin](#kontrak-plugin)
-- [Argument Passing](#argument-passing)
-- [Exit Codes](#exit-codes)
-- [Lokasi Plugin](#lokasi-plugin)
-- [Contoh Plugin](#contoh-plugin)
-- [Best Practices](#best-practices)
-- [Troubleshooting](#troubleshooting)
+> Cara membuat, menginstall, dan mengonfigurasi plugin untuk `dev` v1.0.0.
 
 ---
 
 ## Overview
 
-Plugin `dev` adalah **executable mandiri** yang dipanggil oleh dispatcher `dev`. Tidak ada library yang perlu di-link, tidak ada interface yang perlu di-implement — cukup buat executable dengan nama yang sesuai.
+Plugin `dev` adalah **executable mandiri** — tidak ada library yang perlu di-link. Cukup buat executable, letakkan di `plugins/`, selesai.
 
 ```
 dev <command> [args...]
      │          │
      │          └── Diteruskan ke plugin sebagai argv[1..n]
-     │
-     └── Nama plugin executable yang dicari di plugins/
+     └── Nama plugin executable di plugins/
 ```
 
 ---
 
 ## Kontrak Plugin
 
-Setiap plugin **HARUS** memenuhi spesifikasi berikut:
-
 ### Wajib
 
 | Requirement | Deskripsi |
 |-------------|-----------|
 | **Executable** | File harus bisa dieksekusi oleh OS |
-| **Nama file** | Nama file (tanpa ekstensi di Linux/macOS) menjadi nama command |
-| **Exit code** | Return `0` untuk sukses, non-zero untuk error |
+| **Nama file** | Nama file (tanpa `.exe`) = nama command |
+| **Exit code** | Return `0` sukses, non-zero error |
 
-### Opsional (Rekomendasi)
+### Rekomendasi
 
 | Requirement | Deskripsi |
 |-------------|-----------|
-| **`--help` flag** | Menampilkan bantuan penggunaan |
-| **`--version` flag** | Menampilkan versi plugin |
-| **Stderr untuk error** | Gunakan stderr untuk pesan error, stdout untuk output normal |
+| **`--help` flag** | Menampilkan usage — digunakan oleh `dev help <cmd>` |
+| **Stderr untuk error** | Stdout = output, stderr = error |
+| **Metadata** | Tambahkan entry di `plugins.toml` untuk deskripsi |
+
+---
+
+## Membuat Plugin
+
+### Cara Cepat (scaffolding):
+
+```bash
+dev init-plugin my-tool
+cd my-tool
+cmake -B build && cmake --build build --config Release
+cp build/my-tool.exe ../plugins/    # Windows
+cp build/my-tool ../plugins/        # Linux/macOS
+```
+
+### Manual (C++23):
+
+```cpp
+#include <cstring>
+#include <print>
+
+int main(int argc, char* argv[]) {
+    if (argc > 1 && std::strcmp(argv[1], "--help") == 0) {
+        std::println("my-tool — description");
+        std::println("");
+        std::println("usage: dev my-tool [args...]");
+        return 0;
+    }
+
+    std::println("Hello from my-tool!");
+    return 0;
+}
+```
+
+### Plugin dalam bahasa lain:
+
+**Python** (Linux/macOS):
+```python
+#!/usr/bin/env python3
+import sys
+print(f"Args: {sys.argv[1:]}")
+```
+
+**Bash**:
+```bash
+#!/bin/bash
+echo "Hello from bash plugin! Args: $@"
+```
+
+> Di Linux/macOS, pastikan `chmod +x` pada script plugins.
 
 ---
 
 ## Argument Passing
 
-`dev` meneruskan argumen **apa adanya** ke plugin. Mapping-nya:
+`dev` meneruskan argumen **apa adanya**:
 
 ```
-$ dev create my-app --template cpp --verbose
+$ dev create my-app --template cpp
 
 Plugin menerima:
-  argv[0] = "plugins/create"     (atau path penuh)
+  argv[0] = "plugins/create"     (path ke plugin)
   argv[1] = "my-app"
   argv[2] = "--template"
   argv[3] = "cpp"
-  argv[4] = "--verbose"
-  argc    = 5
+  argc    = 4
 ```
 
-> **Catatan:** `argv[0]` adalah path ke plugin itu sendiri, bukan string `"dev"`.
+> **Catatan:** `argv[0]` adalah path ke plugin, bukan `"dev"`.
 
 ---
 
 ## Exit Codes
-
-Plugin berkomunikasi status via exit code:
 
 | Kode | Arti |
 |------|------|
 | `0` | Sukses |
 | `1` | Error umum |
 | `2` | Penggunaan salah (invalid arguments) |
-| `126` | Command found tapi tidak bisa dieksekusi |
-| `127` | Command not found (digunakan internal oleh `dev`) |
+| `126` | Plugin found tapi tidak executable |
+| `127` | Command not found (internal `dev`) |
 
-`dev` akan **meneruskan exit code plugin** langsung ke shell pemanggil:
+Exit code plugin diteruskan langsung ke shell:
 
 ```bash
 dev build
-echo $?   # Exit code dari plugin "build", bukan dari "dev"
+echo $?   # Exit code dari plugin build, bukan dari dev
 ```
 
 ---
 
-## Lokasi Plugin
+## Plugin Discovery
 
-Plugin harus ditempatkan di folder `plugins/` relatif terhadap binary `dev`:
+### Search Order
 
-```
-dev                 ← dispatcher binary
-plugins/
-├── create          ← plugin "create"
-├── open            ← plugin "open"
-├── build           ← plugin "build"
-└── deploy          ← plugin "deploy"
-```
+| Prioritas | Lokasi | Deskripsi |
+|-----------|--------|-----------|
+| 1 | `<exe-dir>/plugins/` | Relatif ke binary `dev` |
+| 2 | `<cwd>/plugins/` | Relatif ke working directory |
+| 3 | Config dirs | Dari `[plugins] dirs` di `dev.toml` |
 
 ### Penamaan per Platform
 
-| Platform | Nama File | Contoh |
-|----------|-----------|--------|
-| Linux | `<nama>` (tanpa ekstensi) | `plugins/create` |
-| macOS | `<nama>` (tanpa ekstensi) | `plugins/create` |
-| Windows | `<nama>.exe` | `plugins\create.exe` |
+| Platform | Nama File |
+|----------|-----------|
+| Linux/macOS | `plugins/<name>` |
+| Windows | `plugins\<name>.exe` |
 
 ---
 
-## Contoh Plugin
+## Plugin Metadata
 
-### C — Plugin Minimal
+Tambahkan entry di `plugins.toml` untuk deskripsi:
 
-```c
-/* plugins/hello.c */
-#include <stdio.h>
-
-int main(int argc, char* argv[]) {
-    if (argc > 1 && strcmp(argv[1], "--help") == 0) {
-        printf("Usage: dev hello [name]\n");
-        printf("  Prints a hello message.\n");
-        return 0;
-    }
-
-    const char* name = (argc > 1) ? argv[1] : "World";
-    printf("Hello, %s!\n", name);
-    return 0;
-}
+```toml
+[my-tool]
+description = "Does something cool"
 ```
 
-```bash
-# Compile
-gcc -o plugins/hello plugins/hello.c
+Deskripsi ditampilkan di `dev list`:
 
-# Gunakan
-dev hello Rafi
-# Output: Hello, Rafi!
+```
+Available commands:
+  my-tool        Does something cool
 ```
 
-### C++ — Plugin dengan Argument Parsing
+---
+
+## Process Execution
+
+`dev` menggunakan process spawning langsung (bukan `std::system()`):
+
+| Platform | Method |
+|----------|--------|
+| Windows | `_spawnv(P_WAIT, ...)` |
+| POSIX | `fork()` + `execvp()` + `waitpid()` |
+
+Keuntungan: no shell interpretation, argument passing aman, exit code akurat.
+
+---
+
+## Internal Headers
+
+Plugin yang ingin menggunakan dev library headers (opsional):
 
 ```cpp
-// plugins/init.cpp
-#include <iostream>
-#include <string>
-#include <string_view>
-
-int main(int argc, char* argv[]) {
-    if (argc < 2) {
-        std::cerr << "Usage: dev init <project-name> [--lang <language>]\n";
-        return 2;
-    }
-
-    std::string_view project_name = argv[1];
-    std::string lang = "cpp";
-
-    for (int i = 2; i < argc - 1; ++i) {
-        if (std::string_view(argv[i]) == "--lang") {
-            lang = argv[i + 1];
-        }
-    }
-
-    std::cout << "Initializing project: " << project_name 
-              << " (language: " << lang << ")\n";
-
-    // ... logic pembuatan project
-    return 0;
-}
+#include "dev/config.hpp"    // Config file parser
+#include "dev/process.hpp"   // spawn()
+#include "dev/style.hpp"     // ANSI colors
+#include "dev/error.hpp"     // Error codes
 ```
 
-### Python — Script Plugin
-
-```python
-#!/usr/bin/env python3
-"""plugins/lint — Run linter pada project."""
-
-import sys
-import subprocess
-
-def main():
-    if "--help" in sys.argv:
-        print("Usage: dev lint [--fix] [path...]")
-        print("  Run linter pada source files.")
-        return 0
-
-    fix_mode = "--fix" in sys.argv
-    paths = [a for a in sys.argv[1:] if not a.startswith("--")]
-
-    if not paths:
-        paths = ["src/", "include/"]
-
-    cmd = ["clang-tidy"]
-    if fix_mode:
-        cmd.append("--fix")
-    cmd.extend(paths)
-
-    return subprocess.run(cmd).returncode
-
-if __name__ == "__main__":
-    sys.exit(main())
-```
-
-> **Catatan:** Untuk Linux/macOS, pastikan file script memiliki shebang line dan permission executable (`chmod +x`).
-
-### Bash — Shell Script Plugin
-
-```bash
-#!/bin/bash
-# plugins/clean — Bersihkan build artifacts
-
-set -e
-
-if [[ "$1" == "--help" ]]; then
-    echo "Usage: dev clean [--all]"
-    echo "  Hapus folder build dan artifacts."
-    exit 0
-fi
-
-echo "Cleaning build directory..."
-rm -rf build/
-
-if [[ "$1" == "--all" ]]; then
-    echo "Cleaning all artifacts..."
-    rm -rf bin/ lib/
-fi
-
-echo "Done."
-```
+> Plugin tidak wajib depend pada headers ini — mereka sepenuhnya opsional.
 
 ---
 
@@ -243,50 +194,15 @@ echo "Done."
 
 ### ✅ Do
 
-- **Implementasi `--help`** — Semua plugin sebaiknya menampilkan usage info
-- **Gunakan exit code yang benar** — `0` sukses, `1` error, `2` usage error
-- **Tulis ke stderr untuk error** — `stderr` untuk error/warning, `stdout` untuk output
-- **Buat plugin stateless** — Hindari menyimpan state global antar pemanggilan
-- **Dokumentasikan plugin** — Tambahkan deskripsi singkat di README atau file terpisah
+- Implementasi `--help` — digunakan oleh `dev help <cmd>`
+- Gunakan exit code yang benar
+- Tulis ke stderr untuk error
+- Buat plugin stateless
+- Tambahkan metadata di `plugins.toml`
 
 ### ❌ Don't
 
-- **Jangan hardcode path** — Gunakan path relatif atau environment variables
-- **Jangan assume working directory** — Working directory bisa dari mana saja
-- **Jangan block tanpa timeout** — Hindari operasi yang bisa hang tanpa batas waktu
-- **Jangan print ke stdout untuk debug** — Gunakan stderr atau flag `--verbose`
-
----
-
-## Troubleshooting
-
-### Plugin tidak ditemukan
-
-```
-dev: error: command 'foo' not found
-```
-
-**Solusi:**
-1. Pastikan executable ada di folder `plugins/`
-2. Pastikan nama file sesuai (tanpa ekstensi di Linux/macOS, `.exe` di Windows)
-3. Pastikan file memiliki permission executable: `chmod +x plugins/foo`
-
-### Permission denied
-
-```
-dev: error: permission denied: 'plugins/foo'
-```
-
-**Solusi:**
-```bash
-chmod +x plugins/foo
-```
-
-### Plugin crash
-
-Jika plugin crash, `dev` akan meneruskan exit code dari OS (biasanya 139 untuk segfault). Debug plugin secara independen:
-
-```bash
-# Jalankan plugin langsung tanpa dev
-./plugins/foo arg1 arg2
-```
+- Jangan hardcode path
+- Jangan assume working directory
+- Jangan block tanpa timeout
+- Jangan print debug ke stdout (gunakan stderr atau `--verbose`)

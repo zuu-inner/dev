@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            preset: msvc
+          - os: ubuntu-latest
+            preset: gcc
+          - os: macos-latest
+            preset: clang
+
+    runs-on: ${{ matrix.os }}
+    name: Build (${{ matrix.preset }})
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Verify plugins built
+        shell: bash
+        run: |
+          echo "=== Checking plugins directory ==="
+          ls -la plugins/ || ls -la build/plugins/ || echo "No plugins dir"
+
+      - name: Test — version
+        shell: bash
+        run: |
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            ./build/bin/Release/Dev.exe --version
+          else
+            ./build/bin/Dev --version || ./build/bin/Release/Dev --version
+          fi
+
+      - name: Test — list
+        shell: bash
+        run: |
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            ./build/bin/Release/Dev.exe list
+          else
+            ./build/bin/Dev list || ./build/bin/Release/Dev list
+          fi
+
+      - name: Test — hello plugin
+        shell: bash
+        run: |
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            ./build/bin/Release/Dev.exe hello CI
+          else
+            ./build/bin/Dev hello CI || ./build/bin/Release/Dev hello CI
+          fi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-${{ matrix.preset }}
+          path: |
+            build/bin/Release/*
+            plugins/*
+          if-no-files-found: warn

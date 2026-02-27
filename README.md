@@ -29,88 +29,112 @@ dev <command> [args...]
 
 ---
 
-## ✨ Fitur Utama
+## Fitur
 
 | Fitur | Deskripsi |
 |-------|-----------|
 | **Zero-rebuild extension** | Tambah command baru tanpa kompilasi ulang dispatcher |
 | **Plugin berbasis executable** | Tiap plugin adalah program mandiri (bahasa apapun) |
-| **Argument forwarding** | Seluruh `[args...]` diteruskan apa adanya ke plugin |
-| **Exit code propagation** | Exit code plugin diteruskan kembali ke shell |
-| **Cross-platform** | Mendukung Windows (MSVC) dan Linux/macOS (GCC/Clang) |
-| **Modern C++23** | Dibangun dengan standar C++ terbaru |
+| **9 plugins bawaan** | `create`, `open`, `build`, `run`, `clean`, `completion`, `init-plugin`, `hello`, `sysinfo` |
+| **Colored output** | ANSI terminal colors dengan auto-detect TTY |
+| **Config file** | `dev.toml` untuk alias, custom plugin dirs, dll. |
+| **Shell completion** | Bash, Zsh, Fish, PowerShell |
+| **Cross-platform** | Windows (MSVC), Linux (GCC), macOS (Clang) |
+| **Modern C++23** | `<print>`, `<filesystem>`, header-only library |
 
 ---
 
-## 🏗️ Arsitektur
+## Available Commands
 
-```
-┌─────────────────────────────────────────────────┐
-│                    User Shell                    │
-│              $ dev create my-app                 │
-└──────────────────────┬──────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────┐
-│              dev  (dispatcher)                   │
-│                                                  │
-│  1. Parse argv[1] → command name ("create")      │
-│  2. Cari plugin di plugins/ folder               │
-│  3. Exec plugin + forward argv[2..n]             │
-│  4. Propagate exit code                          │
-└──────────────────────┬──────────────────────────┘
-                       │
-          ┌────────────┼────────────┐
-          ▼            ▼            ▼
-     ┌─────────┐ ┌─────────┐ ┌─────────┐
-     │ create  │ │  open   │ │  build  │  ← plugin executables
-     └─────────┘ └─────────┘ └─────────┘
+```bash
+dev create <name> [--template cpp|c|py]   # Scaffold project baru
+dev open [path]                           # Buka di editor (VS Code, dll.)
+dev build [--release]                     # Auto-detect build system & build
+dev run [args...]                         # Auto-detect & run project
+dev clean                                 # Hapus build artifacts
+dev completion <bash|zsh|fish|pwsh>       # Generate shell completions
+dev init-plugin <name>                    # Scaffold plugin baru
+dev list                                  # Daftar semua commands
+dev help <cmd>                            # Help untuk command tertentu
 ```
 
-> Lihat [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) untuk penjelasan arsitektur lengkap.
+**Flags:**
+```bash
+dev --version / -v       # Show version
+dev --help / -h          # Show help
+dev --verbose / -V       # Extra detail
+dev --quiet / -q         # Suppress banners
+```
+
+**Aliases** (via `dev.toml`):
+```bash
+dev b    → dev build
+dev r    → dev run
+dev c    → dev create
+dev o    → dev open
+```
 
 ---
 
-## 📁 Struktur Direktori
+## Architecture
+
+```
+User Shell
+│
+▼
+┌─────────────── dev (dispatcher) ──────────────┐
+│  1. Load config (dev.toml)                     │
+│  2. Resolve alias                              │
+│  3. Resolve plugin in: exe/ → cwd/ → config/  │
+│  4. Spawn plugin + forward argv                │
+│  5. Propagate exit code                        │
+└────────────────────┬──────────────────────────┘
+          ┌──────────┼──────────┐
+          ▼          ▼          ▼
+     ┌────────┐ ┌────────┐ ┌────────┐
+     │ create │ │ build  │ │  run   │  ← plugin executables
+     └────────┘ └────────┘ └────────┘
+```
+
+> Lihat [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) untuk detail.
+
+---
+
+## Struktur Direktori
 
 ```
 dev/
-├── src/
-│   └── main.cpp              # Entry point dispatcher
+├── src/main.cpp                 # Dispatcher entry point
 ├── include/
-│   ├── dev.hpp                # Project metadata (version, author)
-│   ├── cli/
-│   │   └── command.hpp        # Command struct & registry
-│   ├── config/
-│   │   └── project.hpp        # Version macros
-│   ├── core/
-│   │   ├── error.hpp          # Error codes
-│   │   └── registry.hpp       # Plugin registry
-│   └── utils/
-│       └── system.hpp         # Filesystem utilities
-├── plugins/                   # Drop plugin executables di sini
-├── bin/                       # Build output
-├── lib/                       # Library output
-├── scripts/                   # Helper scripts
-├── tests/                     # Unit & integration tests
-├── examples/                  # Contoh plugin
-├── docs/                      # Dokumentasi lengkap
-│   ├── ARCHITECTURE.md
-│   ├── API.md
-│   ├── QUICKSTART.md
-│   ├── CHANGELOG.md
-│   └── ROADMAP.md
-├── CMakeLists.txt             # Build system
-├── BUILD.md                   # Panduan build
-├── CONTRIBUTING.md            # Panduan kontribusi
-├── CODE_OF_CONDUCT.md         # Code of conduct
-├── SECURITY.md                # Security policy
-└── LICENSE                    # Lisensi
+│   ├── dev.hpp                  # Umbrella header
+│   └── dev/
+│       ├── version.hpp.in       # CMake template → version.hpp
+│       ├── error.hpp            # Error codes
+│       ├── style.hpp            # ANSI color utilities
+│       ├── config.hpp           # Config file parser
+│       ├── process.hpp          # Cross-platform process spawning
+│       └── dispatcher.hpp       # Plugin discovery & dispatch
+├── examples/                    # Plugin source files
+│   ├── hello.cpp, sysinfo.cpp   # Example plugins
+│   ├── create.cpp, open.cpp     # Core plugins
+│   ├── build.cpp, run.cpp       #
+│   ├── clean.cpp                #
+│   ├── completion.cpp           # Shell completions
+│   └── init-plugin.cpp          # Plugin scaffolding
+├── plugins/                     # Built plugin executables
+├── docs/                        # Documentation
+├── dist/                        # Package manifests
+│   ├── scoop/dev.json           # Scoop (Windows)
+│   └── homebrew/dev.rb          # Homebrew (macOS)
+├── .github/workflows/ci.yml     # CI pipeline
+├── dev.toml                     # Config file
+├── plugins.toml                 # Plugin metadata
+└── CMakeLists.txt               # Build system
 ```
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -120,71 +144,85 @@ dev/
 ### Build
 
 ```bash
-# Configure
 cmake -B build -DCMAKE_BUILD_TYPE=Release
-
-# Build
 cmake --build build --config Release
-
-# Binary tersedia di build/bin/
 ```
 
-### Jalankan
+### Shell Completion (opsional)
 
 ```bash
-# Tampilkan help
-dev
+# Bash
+eval "$(dev completion bash)"
 
-# Jalankan plugin "create" dengan argumen
-dev create my-project --template cpp
+# Zsh
+eval "$(dev completion zsh)"
+
+# Fish
+dev completion fish > ~/.config/fish/completions/dev.fish
+
+# PowerShell
+dev completion pwsh | Invoke-Expression
 ```
 
 > Untuk panduan lengkap lihat [BUILD.md](BUILD.md) dan [docs/QUICKSTART.md](docs/QUICKSTART.md).
 
 ---
 
-## 🔌 Membuat Plugin
+## Membuat Plugin
 
-Membuat plugin untuk `dev` sangat sederhana — cukup buat executable dengan nama command yang diinginkan.
+### Cara cepat:
 
-**Contoh plugin `hello` (C):**
+```bash
+dev init-plugin my-tool
+cd my-tool
+cmake -B build && cmake --build build --config Release
+cp build/my-tool.exe ../plugins/
+```
 
-```c
-// plugins/hello.c → compile jadi "hello" atau "hello.exe"
-#include <stdio.h>
+### Atau manual — buat executable dengan `--help` support:
+
+```cpp
+// my-tool.cpp → compile jadi "my-tool" atau "my-tool.exe"
+#include <cstring>
+#include <print>
 
 int main(int argc, char* argv[]) {
-    printf("Hello from dev plugin!\n");
-    for (int i = 1; i < argc; i++) {
-        printf("  arg[%d] = %s\n", i, argv[i]);
+    if (argc > 1 && std::strcmp(argv[1], "--help") == 0) {
+        std::println("my-tool — does something cool");
+        return 0;
     }
+    std::println("Hello from my-tool!");
     return 0;
 }
 ```
 
-**Contoh plugin `greet` (Python script — dengan shebang):**
-
-```python
-#!/usr/bin/env python3
-# plugins/greet
-import sys
-
-print(f"Greetings! Args: {sys.argv[1:]}")
-```
-
-Letakkan executable di folder `plugins/`, dan langsung bisa digunakan:
-
-```bash
-dev hello world
-# Output: Hello from dev plugin!
-#           arg[1] = world
-```
+Letakkan executable di folder `plugins/`, langsung bisa digunakan.
 
 > Lihat [docs/API.md](docs/API.md) untuk spesifikasi lengkap plugin API.
 
 ---
 
-## 📖 Dokumentasi
+## Konfigurasi
+
+Buat file `dev.toml` di root project:
+
+```toml
+editor = "code"
+default_template = "cpp"
+
+[plugins]
+dirs = ["~/.dev/plugins"]
+
+[alias]
+b = "build"
+r = "run"
+c = "create"
+o = "open"
+```
+
+---
+
+## Dokumentasi
 
 | Dokumen | Deskripsi |
 |---------|-----------|
@@ -199,19 +237,19 @@ dev hello world
 
 ---
 
-## 🤝 Kontribusi
+## Kontribusi
 
 Kontribusi sangat diterima! Silakan baca [CONTRIBUTING.md](CONTRIBUTING.md) untuk panduan lengkap.
 
 ---
 
-## 📄 Lisensi
+## Lisensi
 
 Proyek ini dilisensikan di bawah **MIT License** — lihat file [LICENSE](LICENSE) untuk detail.
 
 ---
 
-## 👥 Kontributor
+## Kontributor
 
 | Username | Email |
 |----------|-------|
