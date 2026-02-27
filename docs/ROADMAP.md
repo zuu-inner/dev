@@ -4,24 +4,23 @@
 
 ---
 
-## Status: v0.1.0 (Current) — Foundation
+## ✅ v0.1.0 (Current) — Foundation
 
-Tahap pertama: membangun fondasi dispatcher dan plugin system.
-
-### ✅ Selesai
+Fondasi dispatcher dan plugin system — **selesai**.
 
 - [x] Project scaffolding (CMake, folder structure)
-- [x] Header definitions (version, metadata, command struct)
-- [x] Basic CLI entry point (`main.cpp`)
+- [x] Header definitions (version, metadata)
+- [x] Clean include structure (`dev/version`, `error`, `process`, `dispatcher`)
 - [x] Cross-platform build support (MSVC, GCC, Clang)
-
-### 🔄 Dalam Pengerjaan
-
-- [ ] Plugin discovery (scan folder `plugins/`)
-- [ ] Process execution (spawn plugin + forward args)
-- [ ] Exit code propagation
-- [ ] Error handling (command not found, permission denied)
-- [ ] `--help` dan `--version` flags bawaan
+- [x] Plugin discovery (scan folder `plugins/`)
+- [x] Cross-platform process spawning (`_spawnv` / `fork+execvp`)
+- [x] Argument forwarding & exit code propagation
+- [x] Error handling (command not found, permission denied)
+- [x] `--help` dan `--version` flags bawaan
+- [x] `dev list` — Tampilkan semua command yang tersedia
+- [x] `dev help <command>` — Tampilkan help plugin tertentu
+- [x] Example plugins (`hello`, `sysinfo`)
+- [x] Dokumentasi lengkap (README, Architecture, API, QuickStart, Build, Roadmap, Changelog)
 
 ---
 
@@ -44,8 +43,7 @@ Menambahkan konfigurasi dan auto-discovery plugin.
 - [ ] Config file (`~/.devrc` atau `dev.toml`)
 - [ ] Custom plugin directories via config
 - [ ] Plugin metadata (deskripsi, versi, author)
-- [ ] `dev list` — Tampilkan semua command yang tersedia
-- [ ] `dev help <command>` — Tampilkan help plugin tertentu
+- [ ] Multiple plugin search paths (exe-relative + user-defined)
 
 ---
 
