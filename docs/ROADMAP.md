@@ -24,15 +24,15 @@ Fondasi dispatcher dan plugin system — **selesai**.
 
 ---
 
-## v0.2.0 — Core Plugins
+## ✅ v0.2.0 (Current) — Core Plugins
 
-Membuat set awal plugin bawaan untuk workflow developer sehari-hari.
+Plugin bawaan untuk workflow developer sehari-hari — **selesai**.
 
-- [ ] `dev create` — Scaffold project baru dari template
-- [ ] `dev open` — Buka project di editor/IDE
-- [ ] `dev build` — Wrapper untuk build system (CMake, Cargo, etc.)
-- [ ] `dev run` — Compile & jalankan project
-- [ ] `dev clean` — Bersihkan build artifacts
+- [x] `dev create` — Scaffold project baru dari template (cpp, c, py)
+- [x] `dev open` — Buka project di editor/IDE (auto-detect VS Code, dll.)
+- [x] `dev build` — Auto-detect build system (CMake, Cargo, npm, Make, Go)
+- [x] `dev run` — Compile & jalankan project
+- [x] `dev clean` — Bersihkan build artifacts
 
 ---
 

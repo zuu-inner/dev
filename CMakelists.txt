@@ -83,21 +83,30 @@ if(DEV_BUILD_EXAMPLES)
 	set(PLUGIN_OUTPUT_DIR ${CMAKE_SOURCE_DIR}/plugins)
 	file(MAKE_DIRECTORY ${PLUGIN_OUTPUT_DIR})
 
-	# Helper: add a plugin target
+	# Helper: add a plugin target (prefixed to avoid reserved names)
 	function(add_plugin NAME SOURCE)
-		add_executable(${NAME} ${SOURCE})
-		set_target_properties(${NAME} PROPERTIES
-			RUNTIME_OUTPUT_DIRECTORY                ${PLUGIN_OUTPUT_DIR}
-			RUNTIME_OUTPUT_DIRECTORY_DEBUG           ${PLUGIN_OUTPUT_DIR}
-			RUNTIME_OUTPUT_DIRECTORY_RELEASE         ${PLUGIN_OUTPUT_DIR}
-			RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO  ${PLUGIN_OUTPUT_DIR}
-			RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL      ${PLUGIN_OUTPUT_DIR}
+		set(TARGET_NAME "dev_${NAME}")
+		add_executable(${TARGET_NAME} ${SOURCE})
+		set_target_properties(${TARGET_NAME} PROPERTIES
+			OUTPUT_NAME                              ${NAME}
+			RUNTIME_OUTPUT_DIRECTORY                  ${PLUGIN_OUTPUT_DIR}
+			RUNTIME_OUTPUT_DIRECTORY_DEBUG             ${PLUGIN_OUTPUT_DIR}
+			RUNTIME_OUTPUT_DIRECTORY_RELEASE           ${PLUGIN_OUTPUT_DIR}
+			RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO    ${PLUGIN_OUTPUT_DIR}
+			RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL        ${PLUGIN_OUTPUT_DIR}
 			CXX_STANDARD 23
 		)
 	endfunction()
 
 	add_plugin(hello   examples/hello.cpp)
 	add_plugin(sysinfo examples/sysinfo.cpp)
+
+	# Core plugins (v0.2.0)
+	add_plugin(create  examples/create.cpp)
+	add_plugin(open    examples/open.cpp)
+	add_plugin(build   examples/build.cpp)
+	add_plugin(run     examples/run.cpp)
+	add_plugin(clean   examples/clean.cpp)
 
 	message(STATUS "  Plugins → ${PLUGIN_OUTPUT_DIR}")
 endif()
