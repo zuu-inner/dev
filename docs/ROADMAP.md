@@ -48,15 +48,16 @@ Konfigurasi, multi-path discovery, dan plugin metadata — **selesai**.
 
 ---
 
-## v0.4.0 — Developer Experience
+## ✅ v0.4.0 (Current) — Developer Experience
 
-Polish developer experience.
+Polish developer experience — **selesai**.
 
-- [ ] Tab completion (Bash, Zsh, Fish, PowerShell)
-- [ ] Colored output (terminal colors)
-- [ ] Plugin install/update dari registry
-- [ ] Alias support (`dev b` → `dev build`)
-- [ ] Verbose/quiet mode (`--verbose`, `--quiet`)
+- [x] Shell completion generator (`dev completion bash|zsh|fish|pwsh`)
+- [x] Colored output (ANSI terminal colors, auto-detect TTY)
+- [x] Verbose/quiet mode (`--verbose`/`-V`, `--quiet`/`-q`)
+- [x] Windows Virtual Terminal Processing support
+- ~~Alias support~~ → sudah di v0.3.0
+- ~~Plugin install/update~~ → dipindahkan ke v1.0.0
 
 ---
 

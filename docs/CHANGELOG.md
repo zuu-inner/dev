@@ -11,6 +11,15 @@ dan proyek ini mengikuti [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ---
 
+## [0.4.0] — 2026-02-27
+
+### Added
+- ANSI terminal color support (`dev/style.hpp`) with auto TTY detection
+- Windows Virtual Terminal Processing enable
+- Shell completion generator: `dev completion bash|zsh|fish|pwsh`
+- Global flags `--verbose`/`-V` and `--quiet`/`-q`
+- Colored help, list, and error output
+
 ## [0.3.0] — 2026-02-27
 
 ### Added

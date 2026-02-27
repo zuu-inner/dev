@@ -9,5 +9,6 @@
 #include "dev/dispatcher.hpp"
 #include "dev/error.hpp"
 #include "dev/process.hpp"
+#include "dev/style.hpp"
 #include "dev/version.hpp"
 

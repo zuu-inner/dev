@@ -8,6 +8,7 @@
 #include "dev/config.hpp"
 #include "dev/error.hpp"
 #include "dev/process.hpp"
+#include "dev/style.hpp"
 
 #include <algorithm>
 #include <filesystem>
