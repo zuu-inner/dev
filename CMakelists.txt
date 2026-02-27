@@ -4,15 +4,22 @@ cmake_minimum_required(
 
 project(
 	Dev
+<<<<<<< HEAD
 	VERSION 0.1.0
+=======
+	VERSION 0.1
+>>>>>>> 37b6da27f4c64480176e21b21152141ff60d4531
 	DESCRIPTION "Dev CLI Adapter Tool"
 	LANGUAGES CXX C
 )
 
+<<<<<<< HEAD
 set(AUTHOR "zuudevs")
 set(EMAIL "zuudevs@gmail.com")
 set(REPOSITORY "https://github.com/zuudevs/dev")
 
+=======
+>>>>>>> 37b6da27f4c64480176e21b21152141ff60d4531
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -53,7 +60,10 @@ endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE 
     "${CMAKE_SOURCE_DIR}/include"
+<<<<<<< HEAD
 	"${CMAKE_BINARY_DIR}/generated"
+=======
+>>>>>>> 37b6da27f4c64480176e21b21152141ff60d4531
 )
 
 message(STATUS "")

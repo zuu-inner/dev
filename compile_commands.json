@@ -1,7 +1,7 @@
 [
 {
   "directory": "D:/playground/programming/dev/build",
-  "command": "D:\\program\\LLVM\\bin\\clang-cl.exe  /nologo -TP -ID:\\playground\\programming\\dev\\include -ID:\\playground\\programming\\dev\\build\\generated /DWIN32 /D_WINDOWS /EHsc /Zi /Ob0 /Od /RTC1 -clang:-std=c++23 -MDd /W4 /permissive- /utf-8 /FoCMakeFiles\\Dev.dir\\src\\main.cpp.obj /FdCMakeFiles\\Dev.dir\\ -c -- D:\\playground\\programming\\dev\\src\\main.cpp",
+  "command": "D:\\program\\LLVM\\bin\\clang-cl.exe  /nologo -TP -ID:\\playground\\programming\\dev\\include /DWIN32 /D_WINDOWS /EHsc /Zi /Ob0 /Od /RTC1 -clang:-std=c++23 -MDd /W4 /permissive- /utf-8 /FoCMakeFiles\\Dev.dir\\src\\main.cpp.obj /FdCMakeFiles\\Dev.dir\\ -c -- D:\\playground\\programming\\dev\\src\\main.cpp",
   "file": "D:/playground/programming/dev/src/main.cpp",
   "output": "D:/playground/programming/dev/build/CMakeFiles/Dev.dir/src/main.cpp.obj"
 }
