@@ -4,10 +4,12 @@
  */
 
 #include "dev.hpp"
+#include <filesystem>
 #include <print>
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <vector>
 
 namespace s = dev::style;
 
