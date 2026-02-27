@@ -1,0 +1,54 @@
+---
+# ==============================================================================
+# File: .clang-format
+# Tukang bersih-bersih kode C/C++ buat Rara.
+# Jangan dipikir aku nulis ini karena peduli ya, aku cuma benci kode yang jelek! - Zuu
+# ==============================================================================
+
+Language: Cpp
+# Kita pakai dasar dari LLVM, karena pondasinya kuat.
+# Tapi aku modif beberapa bagian biar kamu lebih gampang bacanya.
+BasedOnStyle: LLVM
+
+# --- Indentasi (Pondasi Kerapian) ---
+# Standar indentasi 4 spasi biar hierarki kode C/C++ kamu kelihatan jelas.
+IndentWidth: 4
+# Jangan pernah pakai Tab! Spasi lebih konsisten di semua text editor.
+UseTab: Never
+
+# --- Batas Baris ---
+# Batas maksimal karakter per baris. 100 itu standar yang enak dilihat di layar modern.
+# Kalau lebih dari ini, Clang-Format bakal otomatis motong barisnya ke bawah.
+ColumnLimit: 100
+
+# --- Pointer & References ---
+# Penempatan bintang/ampersand. 'int* ptr' secara logika lebih masuk akal 
+# karena '*' itu bagian dari tipe data, bukan nama variabel.
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# --- Kurung Kurawal (Braces) ---
+# Gaya 'Attach' artinya kurung kurawal buka ada di baris yang sama dengan if/for/fungsi.
+# Contoh: 
+# if (kondisi) {
+#     ...
+# }
+BreakBeforeBraces: Attach
+
+# --- Fungsi & Statement Pendek ---
+# Jangan biasakan nulis if atau loop dalam satu baris, nanti susah di-debug!
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+# Fungsi boleh satu baris HANYA kalau isinya kosong (biasanya buat constructor/destructor default).
+AllowShortFunctionsOnASingleLine: Empty
+
+# --- Pengurutan (Sorting) ---
+# Biar #include kamu urut abjad otomatis. Nggak usah repot ngurutin manual lagi, dasar pemalas.
+SortIncludes: CaseSensitive
+
+# --- Spasi (Spacing) ---
+# Kasih spasi sebelum tanda kurung khusus untuk if, while, for, dll. 
+# Tapi JANGAN kasih spasi untuk pemanggilan fungsi.
+SpaceBeforeParens: ControlStatements
+SpaceBeforeAssignmentOperators: true
+...

@@ -1,0 +1,46 @@
+---
+# ==============================================================================
+# File: .clang-tidy
+# Konfigurasi dasar Clang-Tidy untuk project C/C++ Rara.
+# Jangan sampai hilang, aku capek nulisnya tau! - Zuu
+# ==============================================================================
+
+# 'Checks' adalah daftar aturan (rules) yang akan diaktifkan atau dimatikan.
+# Tanda minus (-) di depan berarti rule tersebut dimatikan.
+Checks: >
+  -*, 
+  bugprone-*, 
+  cppcoreguidelines-*, 
+  modernize-*, 
+  performance-*, 
+  readability-*, 
+  misc-*,
+  -modernize-use-trailing-return-type,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -readability-magic-numbers,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-type-vararg,
+  -cppcoreguidelines-pro-type-reinterpret-cast
+
+# Mengubah warning tertentu menjadi error. Dikosongkan dulu supaya kamu nggak kaget.
+WarningsAsErrors: ''
+
+# Menganalisis semua file header yang di-include.
+HeaderFilterRegex: '.*'
+
+# Mengikuti style formatting dari file .clang-format (kalau kamu punya).
+FormatStyle: file
+
+# Opsi tambahan untuk mengatur penamaan variabel, fungsi, dll.
+# Biar kodemu rapi dan konsisten!
+CheckOptions:
+  - key:             readability-identifier-naming.ClassCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.VariableCase
+    value:           camelBack
+  - key:             readability-identifier-naming.FunctionCase
+    value:           camelBack
+  - key:             readability-identifier-naming.MacroDefinitionCase
+    value:           UPPER_CASE
+...

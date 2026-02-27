@@ -1,76 +1,77 @@
-cmake_minimum_required(
-	VERSION 3.20
-)
+cmake_minimum_required(VERSION 3.20)
 
 project(
 	Dev
-<<<<<<< HEAD
 	VERSION 0.1.0
-=======
-	VERSION 0.1
->>>>>>> 37b6da27f4c64480176e21b21152141ff60d4531
-	DESCRIPTION "Dev CLI Adapter Tool"
-	LANGUAGES CXX C
+	DESCRIPTION "Lightweight CLI Dispatcher"
+	LANGUAGES CXX
 )
 
-<<<<<<< HEAD
-set(AUTHOR "zuudevs")
-set(EMAIL "zuudevs@gmail.com")
+set(AUTHOR     "zuudevs")
+set(EMAIL      "zuudevs@gmail.com")
 set(REPOSITORY "https://github.com/zuudevs/dev")
 
-=======
->>>>>>> 37b6da27f4c64480176e21b21152141ff60d4531
+# ── C++ Standard ──────────────────────────────────────────────
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# ── Output Directories ───────────────────────────────────────
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 
+# ── Generate version header ──────────────────────────────────
+configure_file(
+	${CMAKE_SOURCE_DIR}/include/dev/version.hpp.in
+	${CMAKE_BINARY_DIR}/include/dev/version.hpp
+	@ONLY
+)
+
+# ── Executable ────────────────────────────────────────────────
 add_executable(${PROJECT_NAME}
-    src/main.cpp
+	src/main.cpp
 )
 
+# ── Compiler Warnings ────────────────────────────────────────
 if(MSVC)
-    target_compile_options(${PROJECT_NAME} PRIVATE
-        /W4 
-        /permissive-
-        /utf-8
-    )
+	target_compile_options(${PROJECT_NAME} PRIVATE
+		/W4
+		/permissive-
+		/utf-8
+	)
 else()
-    target_compile_options(${PROJECT_NAME} PRIVATE
-        -Wall 
-        -Wextra 
-        -Wpedantic 
-        -Wconversion 
-        -Wshadow
-    )
+	target_compile_options(${PROJECT_NAME} PRIVATE
+		-Wall
+		-Wextra
+		-Wpedantic
+		-Wconversion
+		-Wshadow
+	)
 endif()
 
+# ── Release Optimizations ────────────────────────────────────
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    if(MSVC)
-        target_compile_options(${PROJECT_NAME} PRIVATE
-			/O2)
-    else()
-        target_compile_options(${PROJECT_NAME} PRIVATE
-			-O3)
-    endif()
+	if(MSVC)
+		target_compile_options(${PROJECT_NAME} PRIVATE /O2)
+	else()
+		target_compile_options(${PROJECT_NAME} PRIVATE -O3)
+	endif()
 endif()
 
-target_include_directories(${PROJECT_NAME} PRIVATE 
-    "${CMAKE_SOURCE_DIR}/include"
-<<<<<<< HEAD
-	"${CMAKE_BINARY_DIR}/generated"
-=======
->>>>>>> 37b6da27f4c64480176e21b21152141ff60d4531
+# ── Include Directories ──────────────────────────────────────
+target_include_directories(${PROJECT_NAME} PRIVATE
+	${CMAKE_SOURCE_DIR}/include
+	${CMAKE_BINARY_DIR}/include
 )
 
+# ── Build Info ────────────────────────────────────────────────
 message(STATUS "")
 message(STATUS "═══════════════════════════════════")
 message(STATUS "  Project: ${PROJECT_NAME}")
 message(STATUS "  Version: ${PROJECT_VERSION}")
-message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
-message(STATUS "  C++ Standard: ${CMAKE_CXX_STANDARD}")
+message(STATUS "  Author:  ${AUTHOR}")
+message(STATUS "  Build:   ${CMAKE_BUILD_TYPE}")
+message(STATUS "  C++:     ${CMAKE_CXX_STANDARD}")
 message(STATUS "═══════════════════════════════════")
 message(STATUS "")

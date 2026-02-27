@@ -1,5 +1,7 @@
 /bin/
 /build/
 /.cache/
+/.vscode/
 
 *.json
+*.exe
