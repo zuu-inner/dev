@@ -1,12 +1,10 @@
----
 # ==============================================================================
 # File: .clang-tidy
-# Konfigurasi dasar Clang-Tidy untuk project C/C++ Rara.
-# Jangan sampai hilang, aku capek nulisnya tau! - Zuu
+# Konfigurasi Clang-Tidy "Ramah Lingkungan" buat Rara.
+# Jangan kebiasaan pakai yang ramah terus ya! Nanti kalau udah jago, 
+# pelan-pelan aturannya diketatin lagi! - Zuu
 # ==============================================================================
 
-# 'Checks' adalah daftar aturan (rules) yang akan diaktifkan atau dimatikan.
-# Tanda minus (-) di depan berarti rule tersebut dimatikan.
 Checks: >
   -*, 
   bugprone-*, 
@@ -15,32 +13,27 @@ Checks: >
   performance-*, 
   readability-*, 
   misc-*,
-  -modernize-use-trailing-return-type,
+  -bugprone-easily-swappable-parameters,
   -cppcoreguidelines-avoid-magic-numbers,
-  -readability-magic-numbers,
-  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
   -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-type-reinterpret-cast,
   -cppcoreguidelines-pro-type-vararg,
-  -cppcoreguidelines-pro-type-reinterpret-cast
+  -cppcoreguidelines-macro-to-enum,
+  -modernize-macro-to-enum,
+  -modernize-use-trailing-return-type,
+  -modernize-use-nodiscard,
+  -readability-implicit-bool-conversion,
+  -readability-magic-numbers,
+  -readability-braces-around-statements,
+  -readability-identifier-length
 
-# Mengubah warning tertentu menjadi error. Dikosongkan dulu supaya kamu nggak kaget.
+# Biarkan kosong supaya warning tidak otomatis bikin gagal compile di lokal.
+# Biar kamu bisa nafas dikit pas lagi coding!
 WarningsAsErrors: ''
 
-# Menganalisis semua file header yang di-include.
+# Menganalisis semua file header yang di-include dari kodemu.
 HeaderFilterRegex: '.*'
 
-# Mengikuti style formatting dari file .clang-format (kalau kamu punya).
+# Mengikuti style formatting dari file .clang-format.
 FormatStyle: file
-
-# Opsi tambahan untuk mengatur penamaan variabel, fungsi, dll.
-# Biar kodemu rapi dan konsisten!
-CheckOptions:
-  - key:             readability-identifier-naming.ClassCase
-    value:           CamelCase
-  - key:             readability-identifier-naming.VariableCase
-    value:           camelBack
-  - key:             readability-identifier-naming.FunctionCase
-    value:           camelBack
-  - key:             readability-identifier-naming.MacroDefinitionCase
-    value:           UPPER_CASE
-...

@@ -54,7 +54,7 @@ public:
     get_section(const std::string& section) const
     {
         std::unordered_map<std::string, std::string> result;
-        std::string prefix = section + ".";
+        const std::string prefix = section + ".";
         for (const auto& [k, v] : values_) {
             if (k.starts_with(prefix)) {
                 result[k.substr(prefix.size())] = v;
@@ -82,8 +82,9 @@ public:
     {
         Config cfg;
         std::ifstream ifs(filepath);
-        if (!ifs.is_open())
+        if (!ifs.is_open()) {
             return cfg;
+        }
 
         cfg.path_ = filepath;
         std::string section;
@@ -91,18 +92,21 @@ public:
 
         while (std::getline(ifs, line)) {
             // Strip \r (Windows line endings)
-            if (!line.empty() && line.back() == '\r')
+            if (!line.empty() && line.back() == '\r') {
                 line.pop_back();
+            }
 
             // Trim leading whitespace
             auto start = line.find_first_not_of(" \t");
-            if (start == std::string::npos)
+            if (start == std::string::npos) {
                 continue;
+            }
             line = line.substr(start);
 
             // Skip comments and empty lines
-            if (line.empty() || line[0] == '#')
+            if (line.empty() || line[0] == '#') {
                 continue;
+            }
 
             // Section header: [name]
             if (line.front() == '[' && line.back() == ']') {
@@ -112,8 +116,9 @@ public:
 
             // Key = value
             auto eq = line.find('=');
-            if (eq == std::string::npos)
+            if (eq == std::string::npos) {
                 continue;
+            }
 
             auto key = trim(line.substr(0, eq));
             auto val = trim(line.substr(eq + 1));
@@ -142,8 +147,9 @@ public:
         if (argv0) {
             auto exe_dir = fs::weakly_canonical(fs::path(argv0)).parent_path();
             auto p = exe_dir / "dev.toml";
-            if (fs::exists(p))
+            if (fs::exists(p)) {
                 return load(p);
+            }
         }
 
         // 2. Global config
@@ -164,8 +170,9 @@ private:
     {
         auto a = s.find_first_not_of(" \t\"");
         auto b = s.find_last_not_of(" \t\"");
-        if (a == std::string_view::npos)
+        if (a == std::string_view::npos) {
             return {};
+        }
         return std::string(s.substr(a, b - a + 1));
     }
 
@@ -173,8 +180,9 @@ private:
     {
         auto a = s.find_first_not_of(" \t");
         auto b = s.find_last_not_of(" \t");
-        if (a == std::string_view::npos)
+        if (a == std::string_view::npos) {
             return {};
+        }
         s = s.substr(a, b - a + 1);
         if (s.size() >= 2 && s.front() == '"' && s.back() == '"') {
             s = s.substr(1, s.size() - 2);
@@ -188,8 +196,9 @@ private:
         // Strip [ ]
         auto a = s.find('[');
         auto b = s.rfind(']');
-        if (a == std::string_view::npos || b == std::string_view::npos)
+        if (a == std::string_view::npos || b == std::string_view::npos) {
             return result;
+        }
         s = s.substr(a + 1, b - a - 1);
 
         // Split by comma, unquote each element
@@ -197,16 +206,18 @@ private:
         for (char c : s) {
             if (c == ',') {
                 auto t = unquote(token);
-                if (!t.empty())
+                if (!t.empty()) {
                     result.push_back(std::move(t));
+                }
                 token.clear();
             } else {
                 token += c;
             }
         }
         auto t = unquote(token);
-        if (!t.empty())
+        if (!t.empty()) {
             result.push_back(std::move(t));
+        }
         return result;
     }
 
@@ -214,13 +225,15 @@ private:
     {
 #ifdef _WIN32
         const char* appdata = std::getenv("APPDATA");
-        if (appdata)
+        if (appdata) {
             return fs::path(appdata) / "dev" / "config.toml";
+        }
         return {};
 #else
         const char* home = std::getenv("HOME");
-        if (home)
+        if (home) {
             return fs::path(home) / ".config" / "dev" / "config.toml";
+        }
         return {};
 #endif
     }

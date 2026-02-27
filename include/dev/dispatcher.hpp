@@ -48,8 +48,9 @@ inline std::vector<fs::path> find_all_plugin_dirs(const char* argv0, const Confi
 #ifndef _WIN32
         if (p.starts_with("~/")) {
             const char* home = std::getenv("HOME");
-            if (home)
+            if (home) {
                 dir = fs::path(home) / p.substr(2);
+            }
         }
 #endif
         if (fs::is_directory(dir)) {
@@ -92,8 +93,9 @@ inline fs::path resolve_plugin(std::string_view command, const std::vector<fs::p
 {
     for (const auto& dir : dirs) {
         auto p = resolve_plugin(command, dir);
-        if (!p.empty())
+        if (!p.empty()) {
             return p;
+        }
     }
     return {};
 }
@@ -102,12 +104,14 @@ inline fs::path resolve_plugin(std::string_view command, const std::vector<fs::p
 inline std::vector<std::string> list_plugins(const fs::path& dir)
 {
     std::vector<std::string> names;
-    if (!fs::is_directory(dir))
+    if (!fs::is_directory(dir)) {
         return names;
+    }
 
     for (const auto& entry : fs::directory_iterator(dir)) {
-        if (!entry.is_regular_file())
+        if (!entry.is_regular_file()) {
             continue;
+        }
         names.push_back(entry.path().stem().string());
     }
     std::sort(names.begin(), names.end());
@@ -149,7 +153,7 @@ inline int dispatch(int argc, char* argv[], const std::vector<fs::path>& dirs)
 }
 
 /// Legacy overload — single implicit dir.
-inline int dispatch(int argc, char* argv[])
+inline int dispatch(int argc, char* argv[]) // NOLINT
 {
     auto dirs = find_all_plugin_dirs(argv[0]);
     return dispatch(argc, argv, dirs);
