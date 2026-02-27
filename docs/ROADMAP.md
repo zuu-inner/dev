@@ -36,14 +36,15 @@ Plugin bawaan untuk workflow developer sehari-hari — **selesai**.
 
 ---
 
-## v0.3.0 — Configuration & Discovery
+## ✅ v0.3.0 (Current) — Configuration & Discovery
 
-Menambahkan konfigurasi dan auto-discovery plugin.
+Konfigurasi, multi-path discovery, dan plugin metadata — **selesai**.
 
-- [ ] Config file (`~/.devrc` atau `dev.toml`)
-- [ ] Custom plugin directories via config
-- [ ] Plugin metadata (deskripsi, versi, author)
-- [ ] Multiple plugin search paths (exe-relative + user-defined)
+- [x] Config file (`dev.toml`) dengan parser INI/TOML-like
+- [x] Custom plugin directories via config `[plugins] dirs`
+- [x] Plugin metadata (`plugins.toml`) — deskripsi di `dev list`
+- [x] Multiple plugin search paths (exe-relative + cwd + config-defined)
+- [x] Alias support via config `[alias]` section (e.g., `b → build`)
 
 ---
 

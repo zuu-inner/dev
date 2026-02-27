@@ -5,11 +5,37 @@
 
 #include "dev.hpp"
 #include <print>
+#include <string>
 #include <string_view>
+#include <unordered_map>
 
-static void print_usage(const char *argv0) {
-  auto dir = dev::find_plugins_dir(argv0);
-  auto plugins = dev::list_plugins(dir);
+// ── Globals (loaded once) ───────────────────────────────────
+
+static dev::Config g_config;
+static std::vector<dev::fs::path> g_plugin_dirs;
+static std::unordered_map<std::string, std::string> g_aliases;
+static dev::Config g_meta; // plugins.toml
+
+static void load_config(const char *argv0) {
+  g_config = dev::Config::find(argv0);
+  g_plugin_dirs = dev::find_all_plugin_dirs(argv0, g_config);
+  g_aliases = g_config.get_section("alias");
+
+  // Load plugin metadata (plugins.toml next to exe or cwd)
+  if (dev::fs::exists("plugins.toml")) {
+    g_meta = dev::Config::load("plugins.toml");
+  } else {
+    auto exe = dev::fs::weakly_canonical(dev::fs::path(argv0));
+    auto p = exe.parent_path() / "plugins.toml";
+    if (dev::fs::exists(p))
+      g_meta = dev::Config::load(p);
+  }
+}
+
+// ── Commands ────────────────────────────────────────────────
+
+static void print_usage() {
+  auto plugins = dev::list_plugins(g_plugin_dirs);
 
   std::println("dev v{} — lightweight CLI dispatcher", dev::version);
   std::println("");
@@ -25,21 +51,38 @@ static void print_usage(const char *argv0) {
   std::println("");
 
   if (plugins.empty()) {
-    std::println("plugins: (none found in {})", dir.string());
+    std::println("plugins: (none)");
   } else {
     std::println("plugins:");
     for (const auto &name : plugins) {
-      std::println("  {}", name);
+      auto desc = g_meta.get(name, "description");
+      if (desc.empty()) {
+        std::println("  {}", name);
+      } else {
+        std::println("  {:<14} {}", name, desc);
+      }
     }
+  }
+
+  if (!g_aliases.empty()) {
+    std::println("");
+    std::println("aliases:");
+    for (const auto &[alias, target] : g_aliases) {
+      std::println("  {:<14} → {}", alias, target);
+    }
+  }
+
+  if (!g_config.empty()) {
+    std::println("");
+    std::println("config: {}", g_config.path().string());
   }
 }
 
-static int cmd_list(const char *argv0) {
-  auto dir = dev::find_plugins_dir(argv0);
-  auto plugins = dev::list_plugins(dir);
+static int cmd_list() {
+  auto plugins = dev::list_plugins(g_plugin_dirs);
 
   if (plugins.empty()) {
-    std::println("No plugins found in {}", dir.string());
+    std::println("No plugins found.");
     std::println("");
     std::println("Place executable files in the plugins/ directory.");
     return 0;
@@ -48,8 +91,23 @@ static int cmd_list(const char *argv0) {
   std::println("Available commands:");
   std::println("");
   for (const auto &name : plugins) {
-    std::println("  {}", name);
+    auto desc = g_meta.get(name, "description");
+    if (desc.empty()) {
+      std::println("  {}", name);
+    } else {
+      std::println("  {:<14} {}", name, desc);
+    }
   }
+
+  if (!g_aliases.empty()) {
+    std::println("");
+    std::println("Aliases:");
+    std::println("");
+    for (const auto &[alias, target] : g_aliases) {
+      std::println("  {:<14} → {}", alias, target);
+    }
+  }
+
   return 0;
 }
 
@@ -60,26 +118,37 @@ static int cmd_help(int argc, char *argv[]) {
   }
 
   std::string_view target = argv[2];
-  auto dir = dev::find_plugins_dir(argv[0]);
-  auto plugin = dev::resolve_plugin(target, dir);
+  auto plugin = dev::resolve_plugin(target, g_plugin_dirs);
 
   if (plugin.empty()) {
     std::println(stderr, "dev: command '{}' not found", target);
     return static_cast<int>(dev::Error::CommandNotFound);
   }
 
-  // Synthesise: plugin --help
   const char *help_argv[] = {argv[0], argv[2], "--help", nullptr};
   return dev::spawn(plugin, 3, const_cast<char **>(help_argv));
 }
 
+// ── Entry point ─────────────────────────────────────────────
+
 int main(int argc, char *argv[]) {
+  load_config(argv[0]);
+
   if (argc < 2) {
-    print_usage(argv[0]);
+    print_usage();
     return 0;
   }
 
-  std::string_view command = argv[1];
+  std::string command_str(argv[1]);
+
+  // ── Resolve alias ───────────────────────────────────────
+  if (auto it = g_aliases.find(command_str); it != g_aliases.end()) {
+    command_str = it->second;
+    // Replace argv[1] with resolved command for forwarding
+    argv[1] = command_str.data();
+  }
+
+  std::string_view command = command_str;
 
   // ── Built-in flags ──────────────────────────────────────
   if (command == "--version" || command == "-v") {
@@ -88,13 +157,13 @@ int main(int argc, char *argv[]) {
   }
 
   if (command == "--help" || command == "-h") {
-    print_usage(argv[0]);
+    print_usage();
     return 0;
   }
 
   // ── Built-in commands ───────────────────────────────────
   if (command == "list") {
-    return cmd_list(argv[0]);
+    return cmd_list();
   }
 
   if (command == "help") {
@@ -102,5 +171,5 @@ int main(int argc, char *argv[]) {
   }
 
   // ── Plugin dispatch ─────────────────────────────────────
-  return dev::dispatch(argc, argv);
+  return dev::dispatch(argc, argv, g_plugin_dirs);
 }

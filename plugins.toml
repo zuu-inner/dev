@@ -1,0 +1,26 @@
+# Plugin metadata — displayed by `dev list`
+#
+# Format:
+#   [plugin-name]
+#   description = "Short description"
+
+[hello]
+description = "Greet someone (or the world)"
+
+[sysinfo]
+description = "Display basic system information"
+
+[create]
+description = "Scaffold a new project from a template"
+
+[open]
+description = "Open a directory in your editor/IDE"
+
+[build]
+description = "Auto-detect build system and build"
+
+[run]
+description = "Auto-detect build system and run the project"
+
+[clean]
+description = "Remove build artifacts"

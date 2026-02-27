@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "dev/config.hpp"
 #include "dev/dispatcher.hpp"
 #include "dev/error.hpp"
 #include "dev/process.hpp"

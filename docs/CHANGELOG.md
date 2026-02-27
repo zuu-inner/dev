@@ -11,6 +11,17 @@ dan proyek ini mengikuti [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ---
 
+## [0.3.0] — 2026-02-27
+
+### Added
+- Config file system (`dev.toml`) with INI/TOML-like parser (`dev/config.hpp`)
+- Multi-path plugin discovery: exe-relative + cwd + config-defined directories
+- Plugin metadata via `plugins.toml` — descriptions shown in `dev list`
+- Alias support via config `[alias]` section (e.g., `b → build`)
+- Config search: local `dev.toml` → global `%APPDATA%/dev/config.toml`
+
+---
+
 ## [0.2.0] — 2026-02-27
 
 ### Added

@@ -1,0 +1,5 @@
+[alias]
+b = "build"
+r = "run"
+c = "create"
+o = "open"
