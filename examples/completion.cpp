@@ -5,6 +5,7 @@
  * Usage:  dev completion <bash|zsh|fish|pwsh>
  */
 
+#include <algorithm>
 #include <cstring>
 #include <filesystem>
 #include <print>
